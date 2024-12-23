@@ -8,11 +8,16 @@ import os
 
 inbox = Inbox()
 
-inbox.serve(os.environ.get("PORT"), os.environ.get("ADDRESS"))
-
 
 @inbox.collate
-def handle(to, sender, body):
+def handle(to, sender, subject, body):
+    print(to)
+    print("--------")
+    print(sender)
+    print("--------")
+    print(subject)
+    print("--------")
+    print(body)
     if os.environ.get("REDIRECT_URL"):
         post(
             "REDIRECT_URL",
@@ -21,8 +26,8 @@ def handle(to, sender, body):
                 "sender": sender,
                 "body": body
             }))
-        print(to, sender, body)
 
 
 if __name__ == "__main__":
+    inbox.serve(25,"217.144.189.150")
     inbox.dispatch()
