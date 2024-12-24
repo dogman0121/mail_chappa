@@ -3,7 +3,7 @@
 import smtpd
 import asyncore
 import argparse
-from email.parser import Parser
+from email import message_from_bytes
 
 from logbook import Logger
 
@@ -18,11 +18,28 @@ class InboxServer(smtpd.SMTPServer, object):
         super(InboxServer, self).__init__(*args, **kwargs)
         self._handler = handler
 
-    def process_message(self, peer, mailfrom, rcpttos, data, mail_options=None, rcpt_options=None):
-        log.info('Collating message from {0}'.format(mailfrom))
-        subject = Parser().parsestr(data.decode(encoding="utf-8"))['subject']
-        log.debug(dict(to=rcpttos, sender=mailfrom, subject=subject, body=data))
-        return self._handler(to=rcpttos, sender=mailfrom, subject=subject, body=data)
+    def process_message(self, peer, mailfrom, rcpttos, data, **kwargs):
+        message = message_from_bytes(data)
+
+        subject = message["Subject"]
+
+        body = ""
+        media = {}
+
+        for part in message.walk():
+            filename = part.get_filename()
+            content_type = part.get_content_type()
+            content = part.get_payload()
+
+            if filename:
+                media[filename] = content
+            else:
+                if content_type == "text/html":
+                    body += content
+                else:
+                    pass
+
+        return self._handler(rcpttos, mailfrom, subject, body, media=media)
 
 
 class Inbox(object):

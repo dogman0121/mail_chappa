@@ -12,20 +12,8 @@ load_dotenv()
 inbox = Inbox()
 
 
-def parse_http_response(response: bytes):
-    if b"\r\n\r\n" in response:
-        headers, body = response.split(b"\r\n\r\n")
-    elif b"\n\n" in response:
-        headers, body = response.split(b"\n\n")
-    else:
-        raise ValueError("Unknown separator")
-
-    return headers, body
-
-
 @inbox.collate
-def handle(to, sender, subject, body):
-    html = parse_http_response(body)[1]
+def handle(to, sender, subject, body, media):
     if os.environ.get("REDIRECT_URL"):
         post(
             "REDIRECT_URL",
@@ -33,8 +21,10 @@ def handle(to, sender, subject, body):
                 "to": to,
                 "sender": sender,
                 "text": subject,
-                "html": html
-            }))
+                "html": body
+            }),
+            files=media
+        )
 
 
 if __name__ == "__main__":
