@@ -1,12 +1,10 @@
-FROM python:latest
+FROM python:3.10-slim
 
-RUN mkdir "mail_chappa"
-
-WORKDIR "mail_chappa"
-
-COPY . "mail_chappa"
+COPY . .
 
 RUN pip install -r requirements.txt
+
+EXPOSE 25
 
 CMD ["python", "main.py"]
 
