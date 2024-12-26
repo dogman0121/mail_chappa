@@ -9,7 +9,7 @@ services:
     restart: always
     ports:
       - <internal_port>:<external_port>
-    environ:
+    environment:
       - ADDRESS=0.0.0.0
       - PORT=25
       - REDIRECT_URL="https://example.com"
